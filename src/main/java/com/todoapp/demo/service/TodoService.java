@@ -13,6 +13,8 @@ import org.springframework.stereotype.Service;
 import com.todoapp.demo.dto.TodoDto;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class TodoService {
@@ -42,7 +44,6 @@ public class TodoService {
         return todoRepository.findAll(spec, pageable);
     }
 
-    // Hızlı fix: tags alanını ignore ediyoruz
     public TodoDto toDto(Todo todo) {
         TodoDto dto = new TodoDto();
         dto.setId(todo.getId());
@@ -52,12 +53,12 @@ public class TodoService {
         dto.setPriority(todo.getPriority());
         dto.setCompleted(todo.isCompleted());
 
-        // ⚡ Şimdilik kaldırdık:
-        // Set<String> tagNames = todo.getTags()
-        //         .stream()
-        //         .map(Tag::getName)
-        //         .collect(Collectors.toSet());
-        // dto.setTags(tagNames);
+        // ✅ Tag isimlerini set et
+        Set<String> tagNames = todo.getTags()
+                .stream()
+                .map(tag -> tag.getName())
+                .collect(Collectors.toSet());
+        dto.setTags(tagNames);
 
         return dto;
     }

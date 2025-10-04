@@ -1,8 +1,10 @@
 package com.todoapp.demo.controller;
 
 import com.todoapp.demo.domain.Priority;
+import com.todoapp.demo.domain.Tag;
 import com.todoapp.demo.domain.Todo;
 import com.todoapp.demo.dto.TodoDto;
+import com.todoapp.demo.service.TagService;
 import com.todoapp.demo.service.TodoService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -11,14 +13,19 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Set;
+import java.util.stream.Collectors;
+
 @RestController
 @RequestMapping("/todos")
 public class TodoController {
 
     private final TodoService todoService;
+    private final TagService tagService;
 
-    public TodoController(TodoService todoService) {
+    public TodoController(TodoService todoService, TagService tagService) {
         this.todoService = todoService;
+        this.tagService = tagService;
     }
 
     @GetMapping
@@ -27,10 +34,6 @@ public class TodoController {
             @RequestParam(required = false) Boolean completed,
             Pageable pageable,
             Authentication authentication) {
-
-        // Debug için
-        System.out.println(">>> Auth name: " + authentication.getName());
-        System.out.println(">>> Principal class: " + authentication.getPrincipal().getClass());
 
         String username = authentication.getName();
         Page<Todo> todos = todoService.getFilteredTodos(username, priority, completed, pageable);
@@ -42,6 +45,14 @@ public class TodoController {
     public ResponseEntity<TodoDto> createTodo(@RequestBody Todo todo, Authentication authentication) {
         String username = authentication.getName();
         System.out.println(">>> Creating todo for user: " + username);
+
+        // Gelen tag’leri resolve et
+        if (todo.getTags() != null && !todo.getTags().isEmpty()) {
+            Set<Tag> resolvedTags = todo.getTags().stream()
+                    .map(tag -> tagService.createTag(tag.getName(), username)) // varsa getir yoksa oluştur
+                    .collect(Collectors.toSet());
+            todo.setTags(resolvedTags);
+        }
 
         Todo created = todoService.createTodo(todo, username);
         return ResponseEntity.status(HttpStatus.CREATED).body(todoService.toDto(created));

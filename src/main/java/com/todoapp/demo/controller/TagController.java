@@ -1,6 +1,7 @@
 package com.todoapp.demo.controller;
 
 import com.todoapp.demo.domain.Tag;
+import com.todoapp.demo.dto.TagDto;
 import com.todoapp.demo.service.TagService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,14 +21,20 @@ public class TagController {
     }
 
     @PostMapping
-    public ResponseEntity<Tag> createTag(@RequestBody Tag tag, Principal principal) {
+    public ResponseEntity<TagDto> createTag(@RequestBody Tag tag, Principal principal) {
         Tag created = tagService.createTag(tag.getName(), principal.getName());
-        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+        TagDto dto = new TagDto(created.getId(), created.getName());
+        return ResponseEntity.status(HttpStatus.CREATED).body(dto);
     }
 
     @GetMapping
-    public ResponseEntity<List<Tag>> getTags(Principal principal) {
+    public ResponseEntity<List<TagDto>> getTags(Principal principal) {
         List<Tag> tags = tagService.getTagsByUser(principal.getName());
-        return ResponseEntity.ok(tags);
+
+        List<TagDto> dtos = tags.stream()
+                .map(tag -> new TagDto(tag.getId(), tag.getName()))
+                .toList();
+
+        return ResponseEntity.ok(dtos);
     }
 }

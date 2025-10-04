@@ -1,5 +1,6 @@
 package com.todoapp.demo.domain;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -7,17 +8,16 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
-
-
 
 @Entity
 @Table(name = "todos")
 @SQLDelete(sql = "UPDATE todos SET deleted = true WHERE id = ?")
 @Where(clause = "deleted = false")
 public class Todo {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -28,7 +28,8 @@ public class Todo {
     @Column(columnDefinition = "text")
     private String description;
 
-    private LocalDateTime dueDate;
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate dueDate;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -58,71 +59,11 @@ public class Todo {
     )
     private Set<Tag> tags = new HashSet<>();
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-    public String getTitle() {
-        return title;
-    }
-    public void setTitle(String title) {
-        this.title = title;
-    }
-    public String getDescription() {
-        return description;
-    }
-    public void setDescription(String description) {
-        this.description = description;
-    }
-    public LocalDateTime getDueDate() {
-        return dueDate;
-    }
-    public void setDueDate(LocalDateTime dueDate) {
-        this.dueDate = dueDate;
-    }
-    public Priority getPriority() {
-        return priority;
-    }
-    public void setPriority(Priority priority) {
-        this.priority = priority;
-    }
-    public boolean isCompleted() {
-        return completed;
-    }
-    public void setCompleted(boolean completed) {
-        this.completed = completed;
-    }
-    public boolean isDeleted() {
-        return deleted;
-    }
-    public void setDeleted(boolean deleted) {
-        this.deleted = deleted;
-    }
-    public Instant getCreatedAt() {
-        return createdAt;
-    }
-    public Instant getUpdatedAt() {
-        return updatedAt;
-    }
-    public User getUser() {
-        return user;
-    }
-    public void setUser(User user) {
-        this.user = user;
-    }
-    public Set<Tag> getTags() {
-        return tags;
-    }
-    public void setTags(Set<Tag> tags) {
-        this.tags = tags;
-    }
-
+    // --- Constructors ---
     public Todo() {
     }
-    public Todo(String title, String description, LocalDateTime dueDate, Priority priority,
+
+    public Todo(String title, String description, LocalDate dueDate, Priority priority,
                 boolean completed, User user, Set<Tag> tags) {
         this.title = title;
         this.description = description;
@@ -132,6 +73,88 @@ public class Todo {
         this.user = user;
         this.tags = tags;
     }
+
+    // --- Getters & Setters ---
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public LocalDate getDueDate() {
+        return dueDate;
+    }
+
+    public void setDueDate(LocalDate dueDate) {
+        this.dueDate = dueDate;
+    }
+
+    public Priority getPriority() {
+        return priority;
+    }
+
+    public void setPriority(Priority priority) {
+        this.priority = priority;
+    }
+
+    public boolean isCompleted() {
+        return completed;
+    }
+
+    public void setCompleted(boolean completed) {
+        this.completed = completed;
+    }
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
+    }
+
+    public Instant getCreatedAt() {
+        return createdAt;
+    }
+
+    public Instant getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public Set<Tag> getTags() {
+        return tags;
+    }
+
+    public void setTags(Set<Tag> tags) {
+        this.tags = tags;
+    }
+
     @Override
     public String toString() {
         return "Todo{" +
@@ -147,5 +170,3 @@ public class Todo {
                 '}';
     }
 }
-
-

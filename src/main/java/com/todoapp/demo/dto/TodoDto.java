@@ -1,15 +1,19 @@
 package com.todoapp.demo.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.todoapp.demo.domain.Priority;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.Set;
 
 public class TodoDto {
     private Long id;
     private String title;
     private String description;
-    private LocalDateTime dueDate;
+
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate dueDate;
+
     private Priority priority;
     private boolean completed;
     private Set<String> tags;
@@ -24,8 +28,8 @@ public class TodoDto {
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
 
-    public LocalDateTime getDueDate() { return dueDate; }
-    public void setDueDate(LocalDateTime dueDate) { this.dueDate = dueDate; }
+    public LocalDate getDueDate() { return dueDate; }
+    public void setDueDate(LocalDate dueDate) { this.dueDate = dueDate; }
 
     public Priority getPriority() { return priority; }
     public void setPriority(Priority priority) { this.priority = priority; }

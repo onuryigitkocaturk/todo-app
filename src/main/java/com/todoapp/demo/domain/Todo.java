@@ -11,6 +11,10 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
+// buradaki sqldelete softdelete özelliğini aktif hale getiriyor. Hibernate'e diyoruz ki
+// veritabanından satırı tamamen silme, sadece deleted kolonunu true yap
+// where deleted = false koşulu sayesinde, deleted = true olan kayıtlar findAll(),
+// findById() sonuçlarına dahil olmazlar.
 
 @Entity
 @Table(name = "todos")
@@ -22,15 +26,23 @@ public class Todo {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // string için JPA default olarak VARCHAR(256) yer ayırır,
+    // title için bu yeterli geldi, ama description'da "text" oldugunu belirttik
+    // böylece description neredeyse sınırsız yer ayırıyor.
     @Column(nullable = false)
     private String title;
 
     @Column(columnDefinition = "text")
     private String description;
 
+    // JSON "LocalDate" tipini tanımaz, bu yüzden nesneyi stringe çevirmek lazım
+    // bunu da @JsonFormat anotasyonuyla yaparız.
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate dueDate;
 
+    // java tarafında todo.getPriority() çağırıldığında  bir enum
+    // nesnesi dönüyor. string olmasını beklerdik, çevirme yapılıyor
+    // priority gönderilmemişse default olarak medium ayarlanıyor.
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Priority priority = Priority.MEDIUM;
@@ -47,10 +59,18 @@ public class Todo {
     @UpdateTimestamp
     private Instant updatedAt;
 
+    // buradaki optional = false, bu ilişkinin zorunlu olduğunu anlatıyor, bir todo
+    // bir user'a ait olmak zorunda
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
 
+    // bir todo birden fazla tag alabilir, bir tag birden fazla todo'ya eklenebilir
+    // @JoinTable diyor ki aradaki ilişkiyi "todo_tags" isimli join tablosunda tut
+    // joinColumns : köprü tablosunda Todo'nun FK kolonu (todo_id)
+    // inverseJoinColumns : köprü tablosunda Tag'in FK kolonu (tag_id)
+    // todo_tags tablosundaki her satır "şu todo <-> şu tag" eşleşmesini temsil eder
+    // FK'lar, boşluğa işaret eden ilişki olmasın diye DB seviyesinde güvence sağlar.
     @ManyToMany
     @JoinTable(
             name = "todo_tags",
@@ -60,6 +80,9 @@ public class Todo {
     private Set<Tag> tags = new HashSet<>();
 
     // --- Constructors ---
+    // JPA sadece boş constructor görse yeter
+    // JPA parametreli constructor'ı hiç kullanmaz, Todo'yu veritabanından çekerken
+    // default constructor ile oluşturur, sonra field'ları tek tek set eder.
     public Todo() {
     }
 
@@ -75,6 +98,9 @@ public class Todo {
     }
 
     // --- Getters & Setters ---
+    // JPA entity'ler alanlara doğrudan erişebilir
+    // bu yüzden getter&setterlar JPA için zorunlu değil
+    // ama kod seviyesinde controller, service, dto, json serializer bu kodu kullanıyor
     public Long getId() {
         return id;
     }

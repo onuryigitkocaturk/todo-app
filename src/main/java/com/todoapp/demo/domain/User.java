@@ -27,6 +27,10 @@ public class User {
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
     private Instant createdAt;
+    // burada boş constructor yok, çünkü java default olarak bunu sağlıyor.
+    // eğer parametreli bir constructor ekleseydik, boş constructor da eklemek gerekirdi.
+
+
 
     public Long getId() {
         return id;

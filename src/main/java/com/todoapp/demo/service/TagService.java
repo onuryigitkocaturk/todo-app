@@ -10,7 +10,7 @@ import java.util.List;
 
 @Service
 public class TagService {
-
+    // veritabanıyla konuşmak için kullanılan repository katmanları:
     private final TagRepository tagRepository;
     private final UserRepository userRepository;
 
@@ -18,7 +18,15 @@ public class TagService {
         this.tagRepository = tagRepository;
         this.userRepository = userRepository;
     }
-
+    // kullanıcı için yeni tag oluşturur, kullanıcıyı bulur, bulamazsa hata fırlatır
+    // RuntimeException("User not found)
+    // yeni tag nesnesi oluşturur, tag ile kullanıcıyla ilişkilendirir (Many-to-One ilişki)
+    // tagRepository.save(tag) ile veritabanına ekler.
+    // mantık olarak: "bu kullanıcı için şu isimde bir tag oluştur"
+    // POST /tags endpointine şöyle bir JSON gider:
+    // { "name": "Work"}
+    // controller bunu tagService.createTag("Work", principal.getName()) şeklinde çağırır.
+    // service metodu kullanıcıyı bulur, Tag("Work", user) nesnesini oluşturur ve kaydeder.
     public Tag createTag(String tagName, String username) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -29,7 +37,11 @@ public class TagService {
 
         return tagRepository.save(tag);
     }
-
+    // username'e göre kullanıcı bulur
+    // sonra bu kullanıcıya ait tüm tagleri tagRepository.findByUser(user) ile getirir.
+    // bu method GET /tags endpointinin arkasında çalışıyor. her kullanıcı
+    // sadece kendi etiketini görebilir.
+    // genel akış controller -> service -> repository -> database
     public List<Tag> getTagsByUser(String username) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
